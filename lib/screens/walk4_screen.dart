@@ -30,9 +30,12 @@ class _Walk4ScreenState extends State<Walk4Screen>
   Timer? _timer;
   bool _isPlaying = false;
   bool _isPausing = false;
-  var _totalHours = 0; // TOTAL TIME HOURS
-  var _totalMinutes = 0; // TOTAL TIME MINUTES
-  var _totalSeconds = 0; // TOTAL TIME SECONDS
+  int _totalHours = 0; // TOTAL TIME HOURS
+  int _totalMinutes = 0; // TOTAL TIME MINUTES
+  int _totalSeconds = 0; // TOTAL TIME SECONDS
+  int _finalHours = 0;
+  int _finalMinutes = 0;
+  int _finalSeconds = 0;
   String _status = '산책 시작';
 
   // 시작, 일시정지 버튼
@@ -63,7 +66,8 @@ class _Walk4ScreenState extends State<Walk4Screen>
   Map<PolylineId, Polyline> polylines = {};
   List<LatLng> polylineCoordinates = [];
 
-  double totalDistance = 0.0;
+  double _totalDistance = 0.0;
+  double _finalDistance = 0.0;
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -141,9 +145,14 @@ class _Walk4ScreenState extends State<Walk4Screen>
       _timer?.cancel();
       _locationSubscription!.cancel();
 
+      _finalHours = _totalHours;
+      _finalMinutes = _totalMinutes;
+      _finalSeconds = _totalSeconds;
+      _finalDistance = _totalDistance;
       _totalMinutes = 0;
       _totalSeconds = 0;
       _totalHours = 0;
+      _totalDistance = 0;
     });
   }
 
@@ -250,7 +259,7 @@ class _Walk4ScreenState extends State<Walk4Screen>
       // Calculating the total distance by adding the distance
       // between small segments
       for (int i = 0; i < polylineCoordinates.length - 1; i++) {
-        totalDistance += _coordinateDistance(
+        _totalDistance += _coordinateDistance(
           polylineCoordinates[i].latitude,
           polylineCoordinates[i].longitude,
           polylineCoordinates[i + 1].latitude,
@@ -259,7 +268,7 @@ class _Walk4ScreenState extends State<Walk4Screen>
       }
 
       setState(() {
-        _placeDistance = totalDistance.toStringAsFixed(2);
+        _placeDistance = _totalDistance.toStringAsFixed(2);
         print('DISTANCE: $_placeDistance km');
       });
 
@@ -364,7 +373,7 @@ class _Walk4ScreenState extends State<Walk4Screen>
     _locationSubscription =
         location.onLocationChanged.listen((lc.LocationData currentLocation) {
           /// 위치 변경시마다 totalDistance에 거리값 더해주기
-          totalDistance += (measureExact(
+          _totalDistance += (measureExact(
               _oldLocationData!.latitude, _oldLocationData!.longitude));
           // Use current location
           setState(() {
@@ -530,7 +539,7 @@ class _Walk4ScreenState extends State<Walk4Screen>
                                   ? Text(
                                 '$_totalHours:',
                                 style: TextStyle(
-                                  fontSize: Get.width * 0.1,
+                                  fontSize: Get.width * 0.08,
                                   fontWeight: FontWeight.bold,
                                 ),
                               )
@@ -540,7 +549,7 @@ class _Walk4ScreenState extends State<Walk4Screen>
                                     ? '0$_totalMinutes'
                                     : '$_totalMinutes',
                                 style: TextStyle(
-                                  fontSize: Get.width * 0.1,
+                                  fontSize: Get.width * 0.08,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -549,7 +558,7 @@ class _Walk4ScreenState extends State<Walk4Screen>
                                     ? ':0$_totalSeconds'
                                     : ':$_totalSeconds',
                                 style: TextStyle(
-                                  fontSize: Get.width * 0.1,
+                                  fontSize: Get.width * 0.08,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -568,9 +577,9 @@ class _Walk4ScreenState extends State<Walk4Screen>
                               )),
                           const SizedBox(height: 10),
                           Text(
-                            '${totalDistance.toStringAsFixed(1)}km',
+                            '${_totalDistance.toStringAsFixed(2)}km',
                             style: TextStyle(
-                              fontSize: Get.width * 0.1,
+                              fontSize: Get.width * 0.08,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -635,7 +644,7 @@ class _Walk4ScreenState extends State<Walk4Screen>
                           child: Container(
                             decoration: BoxDecoration(
                               border:
-                              Border.all(color: Colors.blueAccent, width: 2),
+                              Border.all(color: Colors.redAccent, width: 2),
                               borderRadius: BorderRadius.circular(100),
                             ),
                             height: 100,
@@ -664,7 +673,7 @@ class _Walk4ScreenState extends State<Walk4Screen>
                           onTap: () async {
                             ///
                             _reset();
-                            Get.to(() => MyHomePage());
+                            Get.to(() => MyHomePage(_finalHours, _finalMinutes, _finalSeconds, _finalDistance));
                           },
                         ),
                       ),
@@ -678,7 +687,7 @@ class _Walk4ScreenState extends State<Walk4Screen>
                       child: Container(
                         decoration: BoxDecoration(
                           border:
-                          Border.all(color: Colors.blueAccent, width: 2),
+                          Border.all(color: _isPlaying ? Colors.grey : Colors.blueAccent, width: 2),
                           borderRadius: BorderRadius.circular(100),
                         ),
                         height: 100,
