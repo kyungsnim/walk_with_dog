@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:walk_with_dog/screens/my_home_page.dart';
 import 'package:walk_with_dog/screens/my_screen.dart';
 import 'package:walk_with_dog/screens/walk2_screen.dart';
+import 'package:walk_with_dog/screens/walk3_screen.dart';
+import 'package:walk_with_dog/screens/walk4_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final int getPageIndex;
@@ -65,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         child: Scaffold(
           body: PageView(
             children: [
-              const Walk2Screen(),
+              Walk4Screen(), //Walk2Screen(),
               Container(),
               Container(),
               const MyScreen(),

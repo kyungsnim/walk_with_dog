@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.kyungsnim.walk_with_dog">
+    <uses-permission android:name="android.permission.INTERNET"/>
    <application
         android:label="walk_with_dog"
         android:name="${applicationName}"

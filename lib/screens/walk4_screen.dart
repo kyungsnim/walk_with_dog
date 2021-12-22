@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -9,15 +12,17 @@ import 'package:location/location.dart' as lc;
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:walk_with_dog/constants/constants.dart';
+import 'package:walk_with_dog/constants/data4.dart';
+import 'package:walk_with_dog/screens/my_home_page.dart';
 
-class Walk2Screen extends StatefulWidget {
-  const Walk2Screen({Key? key}) : super(key: key);
+class Walk4Screen extends StatefulWidget {
+  const Walk4Screen({Key? key}) : super(key: key);
 
   @override
-  _Walk2ScreenState createState() => _Walk2ScreenState();
+  _Walk4ScreenState createState() => _Walk4ScreenState();
 }
 
-class _Walk2ScreenState extends State<Walk2Screen>
+class _Walk4ScreenState extends State<Walk4Screen>
     with AutomaticKeepAliveClientMixin {
   /// 산책 시간 관련
   IconData _icon = Icons.play_arrow;
@@ -52,7 +57,7 @@ class _Walk2ScreenState extends State<Walk2Screen>
   String _destinationAddress = '';
   String? _placeDistance;
 
-  Set<Marker> markers = {};
+  Set<Marker> _markers = {};
 
   late PolylinePoints polylinePoints;
   Map<PolylineId, Polyline> polylines = {};
@@ -81,6 +86,8 @@ class _Walk2ScreenState extends State<Walk2Screen>
       _start();
       setState(() {
         _isPausing = false;
+        /// 산책거리 계산 재시작
+        _locationSubscription!.resume();
       });
     } else { /// 일시중지버튼 누른 경우
       _icon = Icons.play_arrow;
@@ -89,6 +96,8 @@ class _Walk2ScreenState extends State<Walk2Screen>
       _pause();
       setState(() {
         _isPausing = true;
+        /// 산책거리 계산 중지
+        _locationSubscription!.pause();
       });
     }
   }
@@ -125,9 +134,12 @@ class _Walk2ScreenState extends State<Walk2Screen>
       _pause();
     }
     setState(() {
+
       _isPlaying = false;
       _isPausing = false;
+
       _timer?.cancel();
+      _locationSubscription!.cancel();
 
       _totalMinutes = 0;
       _totalSeconds = 0;
@@ -142,7 +154,7 @@ class _Walk2ScreenState extends State<Walk2Screen>
       // Retrieving placemarks from addresses
       List<Location> startPlacemark = await locationFromAddress(_startAddress);
       List<Location> destinationPlacemark =
-          await locationFromAddress(_destinationAddress);
+      await locationFromAddress(_destinationAddress);
 
       // Use the retrieved coordinates of the current position,
       // instead of the address if the start position is user's
@@ -189,8 +201,8 @@ class _Walk2ScreenState extends State<Walk2Screen>
       );
 
       // Adding the markers to the list
-      markers.add(startMarker);
-      markers.add(destinationMarker);
+      _markers.add(startMarker);
+      _markers.add(destinationMarker);
 
       print(
         'START COORDINATES: ($startLatitude, $startLongitude)',
@@ -258,6 +270,13 @@ class _Walk2ScreenState extends State<Walk2Screen>
     return false;
   }
 
+  Future<Uint8List> getBytesFromAsset(String path, int width) async {
+    ByteData data = await rootBundle.load(path);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: width);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
+  }
+
   // Formula for calculating distance between two coordinates
   // https://stackoverflow.com/a/54138876/11910277
   double _coordinateDistance(lat1, lon1, lat2, lon2) {
@@ -271,11 +290,11 @@ class _Walk2ScreenState extends State<Walk2Screen>
 
   // Create the polylines for showing the route between two places
   _createPolylines(
-    double startLatitude,
-    double startLongitude,
-    double destinationLatitude,
-    double destinationLongitude,
-  ) async {
+      double startLatitude,
+      double startLongitude,
+      double destinationLatitude,
+      double destinationLongitude,
+      ) async {
     polylinePoints = PolylinePoints();
 
     polylinePoints.getRouteBetweenCoordinates(
@@ -313,7 +332,7 @@ class _Walk2ScreenState extends State<Walk2Screen>
   @override
   void initState() {
     super.initState();
-    location.getLocation().then((location) {
+    location.getLocation().then((location) async {
       _newLocationData = location;
       _oldLocationData = location;
       print('_newLocationData.lng : ${_newLocationData!.longitude}');
@@ -324,7 +343,7 @@ class _Walk2ScreenState extends State<Walk2Screen>
     _getCurrentLocation();
   }
 
-  permissionCheck() async {
+  permissionCheckAndSubscription() async {
     _serviceEnabled = await location.serviceEnabled();
     if (!_serviceEnabled!) {
       _serviceEnabled = await location.requestService();
@@ -341,21 +360,33 @@ class _Walk2ScreenState extends State<Walk2Screen>
       }
     }
 
+    /// 위치 구독
     _locationSubscription =
         location.onLocationChanged.listen((lc.LocationData currentLocation) {
-      totalDistance += (measureExact(
-          _oldLocationData!.latitude, _oldLocationData!.longitude));
-      // Use current location
-      setState(() {
-        _oldLocationData = _newLocationData;
-        _newLocationData = currentLocation;
-        _calculateDistance(_newLocationData!, _oldLocationData!);
-        print('_oldLocationData.lng : ${_oldLocationData!.longitude}');
-        print('_oldLocationData.lat : ${_oldLocationData!.latitude}');
-        print('_newLocationData.lng : ${_newLocationData!.longitude}');
-        print('_newLocationData.lat : ${_newLocationData!.latitude}');
-      });
-    });
+          /// 위치 변경시마다 totalDistance에 거리값 더해주기
+          totalDistance += (measureExact(
+              _oldLocationData!.latitude, _oldLocationData!.longitude));
+          // Use current location
+          setState(() {
+            /// 이동궤적이 추가
+            raw.add([currentLocation.longitude!, currentLocation.latitude!, 200]);
+            /// 이전 위치 변경
+            _oldLocationData = _newLocationData;
+            /// 새로운 위치 변경
+            _newLocationData = currentLocation;
+            _calculateDistance(_newLocationData!, _oldLocationData!);
+
+            /// 위치 이동마다 카메라 위치도 이동시켜주기
+            mapController!.animateCamera(
+              CameraUpdate.newCameraPosition(
+                CameraPosition(
+                  target: LatLng(currentLocation.latitude!, currentLocation.longitude!),
+                  zoom: 18.0,
+                ),
+              ),
+            );
+          });
+        });
   }
 
   measureExact(lat, lng) {
@@ -373,6 +404,23 @@ class _Walk2ScreenState extends State<Walk2Screen>
     var c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
     var d = R * c;
     return d; //.toStringAsFixed(2); // meters
+  }
+
+  void _updatePosition(CameraPosition _position) async {
+    /// 위치 이동될 때마다 puppy 마커도 이동시켜 주기
+    var m = _markers.firstWhere((p) => p.markerId == MarkerId('puppy'),
+        orElse: () {return const Marker(markerId: MarkerId('null'));});
+    _markers.remove(m);
+    _markers.add(
+      Marker(
+        markerId: MarkerId('puppy'),
+        position: LatLng(_position.target.latitude, _position.target.longitude
+        ),
+        icon: await BitmapDescriptor.fromAssetImage(ImageConfiguration.empty, 'assets/marker.png'),
+        draggable: true,
+      ),
+    );
+    setState(() {});
   }
 
   @override
@@ -393,7 +441,7 @@ class _Walk2ScreenState extends State<Walk2Screen>
                   height: Get.height * 0.55,
                   width: Get.width,
                   child: GoogleMap(
-                    markers: Set<Marker>.from(markers),
+                    markers: Set<Marker>.from(_markers),
                     initialCameraPosition: _initialLocation,
                     myLocationEnabled: true,
                     myLocationButtonEnabled: true,
@@ -404,6 +452,7 @@ class _Walk2ScreenState extends State<Walk2Screen>
                     onMapCreated: (GoogleMapController controller) {
                       mapController = controller;
                     },
+                    onCameraMove: ((_position) => _updatePosition(_position)),
                   ),
                 ),
                 // Show zoom buttons
@@ -479,12 +528,12 @@ class _Walk2ScreenState extends State<Walk2Screen>
                             children: [
                               _totalHours > 0
                                   ? Text(
-                                      '$_totalHours:',
-                                      style: TextStyle(
-                                        fontSize: Get.width * 0.1,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )
+                                '$_totalHours:',
+                                style: TextStyle(
+                                  fontSize: Get.width * 0.1,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
                                   : const SizedBox(),
                               Text(
                                 _totalMinutes < 10
@@ -519,7 +568,7 @@ class _Walk2ScreenState extends State<Walk2Screen>
                               )),
                           const SizedBox(height: 10),
                           Text(
-                            '${totalDistance}km',
+                            '${totalDistance.toStringAsFixed(1)}km',
                             style: TextStyle(
                               fontSize: Get.width * 0.1,
                               fontWeight: FontWeight.bold,
@@ -568,11 +617,11 @@ class _Walk2ScreenState extends State<Walk2Screen>
                             ),
                           ),
                           onTap: () async {
-                            ///
-                            _click();
 
                             /// 산책 기록 시작
-                            permissionCheck();
+                            permissionCheckAndSubscription().then((_) {
+                              _click();
+                            });
                           },
                         ),
                       ),
@@ -615,6 +664,7 @@ class _Walk2ScreenState extends State<Walk2Screen>
                           onTap: () async {
                             ///
                             _reset();
+                            Get.to(() => MyHomePage());
                           },
                         ),
                       ),
@@ -655,11 +705,24 @@ class _Walk2ScreenState extends State<Walk2Screen>
                         ),
                       ),
                       onTap: () async {
-                        ///
-                        _click();
+
+                        _getCurrentLocation().then((_) async {
+                          /// 시작 지점 저장
+                          setState(() {
+                            startLatPoint = _currentPosition.latitude;
+                            startLngPoint = _currentPosition.longitude;
+                          });
+
+                          final Uint8List markerIcon = await getBytesFromAsset('assets/marker.png', 200);
+                          final Marker marker = Marker(icon: BitmapDescriptor.fromBytes(markerIcon), markerId: const MarkerId('puppy'), position: LatLng(_currentPosition.latitude, _currentPosition.longitude));
+                          _markers.add(marker);
+                        });
 
                         /// 산책 기록 시작
-                        permissionCheck();
+                        permissionCheckAndSubscription().then((_) {
+                          ///
+                          _click();
+                        });
                       },
                     ),
                   ),
@@ -688,7 +751,8 @@ class _Walk2ScreenState extends State<Walk2Screen>
           ),
         );
       });
-      await _getAddress();
+
+      // await _getAddress();
     }).catchError((e) {
       print(e);
     });
@@ -696,31 +760,31 @@ class _Walk2ScreenState extends State<Walk2Screen>
 
   // Method for retrieving the address
 
-  _getAddress() async {
-    try {
-      // Places are retrieved using the coordinates
-      List<Placemark> p = await GeocodingPlatform.instance
-          .placemarkFromCoordinates(
-              _currentPosition.latitude, _currentPosition.longitude);
-
-      // Taking the most probable result
-      Placemark place = p[0];
-
-      setState(() {
-        // Structuring the address
-        _currentAddress =
-            "${place.name}, ${place.locality}, ${place.postalCode}, ${place.country}";
-
-        // Update the text of the TextField
-        startAddressController.text = _currentAddress;
-
-        // Setting the user's present location as the starting address
-        _startAddress = _currentAddress;
-      });
-    } catch (e) {
-      print(e);
-    }
-  }
+  // _getAddress() async {
+  //   try {
+  //     // Places are retrieved using the coordinates
+  //     List<Placemark> p = await GeocodingPlatform.instance
+  //         .placemarkFromCoordinates(
+  //         _currentPosition.latitude, _currentPosition.longitude);
+  //
+  //     // Taking the most probable result
+  //     Placemark place = p[0];
+  //
+  //     setState(() {
+  //       // Structuring the address
+  //       _currentAddress =
+  //       "${place.name}, ${place.locality}, ${place.postalCode}, ${place.country}";
+  //
+  //       // Update the text of the TextField
+  //       startAddressController.text = _currentAddress;
+  //
+  //       // Setting the user's present location as the starting address
+  //       _startAddress = _currentAddress;
+  //     });
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
 
   @override
   bool get wantKeepAlive => true;
