@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # 산책 화면에 사용된 패키지
   google_maps_flutter: ^2.1.1       # 구글 지도
   flutter_polyline_points: ^1.0.0   # 구글 지도 경로표시용
   loading_indicator: ^3.0.1         # 로딩 아이콘
@@ -21,11 +22,15 @@ dependencies:
   path_provider: ^2.0.8             # 이미지 저장 경로 지정
   geolocator: ^8.0.1                # 현재 위치(위/경도) 가져오기
   geocoding: ^2.0.1
-  location: ^4.3.0
+  location: ^4.3.0                  # 현재 위치(위/경도) 가져오기
 
-  map_elevation: ^2.0.0
-  flutter_map: ^0.14.0
+  # 산책 결과화면에 사용된 패키지
+  map_elevation: ^2.0.0             # 산책경로/시간 결과화면 그리기용
+  flutter_map: ^0.14.0              # 산책경로/시간 결과화면 그리기용
   latlong2: ^0.8.0
+  screenshot: ^1.2.3                # 산책경로/시간 결과화면 스크린샷용
+  share: ^2.0.4                     # 스크린샷 공유하기 (테스트용)
+
 
 
   cupertino_icons: ^1.0.2
