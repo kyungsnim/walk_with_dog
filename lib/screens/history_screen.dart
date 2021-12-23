@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -190,30 +191,33 @@ class _HistoryScreenState extends State<HistoryScreen> {
     // List<XFile>? pickedFileList = await ImagePicker().pickMultiImage();
     XFile? pickedFile = await ImagePicker()
         .pickImage(source: ImageSource.camera, imageQuality: 50);
-    // final tempDir = await getTemporaryDirectory();
-    // final path = tempDir.path;
-    // int rand = new Math.Random().nextInt(10000);
+
+    String imageId = DateTime.now().millisecondsSinceEpoch.toString();
+    final directory = await getApplicationDocumentsDirectory();
+    File _image =
+    await File('${directory.path}/image_$imageId.png').create();
+    /// 임시폴더가 아닌 AppDocument폴더에 저장
+    pickedFile!.saveTo(_image.path);
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    String _imagePath = '';
     setState(() {
-      _imagePath = pickedFile!.path;
-      print('imagePath : $_imagePath');
+      print('imagePath : ${_image.path}');
       List<String> tmpData = prefs.getStringList('saveData$index')!;
 
       /// 이미지 저장 처음인 경우
       if(tmpData.length == 4) {
-        tmpData.add(_imagePath);
+        tmpData.add(_image.path);
         prefs.setStringList('saveData$index', tmpData);
       } else {
         tmpData.removeAt(4);
         saveData[index].removeAt(4);
-        tmpData.add(_imagePath);
+        tmpData.add(_image.path);
         prefs.setStringList('saveData$index', tmpData);
       }
 
       setState(() {
-        saveData[index].add(_imagePath);
+        saveData[index].add(_image.path);
       });
       // /// image picker XFile to make file
       // _imageFile = File(pickedFile.path);

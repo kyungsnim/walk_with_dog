@@ -512,7 +512,12 @@ class _WalkScreenState extends State<WalkScreen>
                             _reset();
 
                             /// 결과 페이지로 이동
-                            Get.to(() => WalkResultScreen(_finalHours, _finalMinutes, _finalSeconds, _finalDistance));
+                            Get.to(() => WalkResultScreen(_finalHours, _finalMinutes, _finalSeconds, _finalDistance))!.then((_) {
+                              /// 산책경로 초기화
+                              setState(() {
+                                raw = [];
+                              });
+                            });
                           },
                         ),
                       ),
@@ -564,11 +569,6 @@ class _WalkScreenState extends State<WalkScreen>
                           final Uint8List markerIcon = await getBytesFromAsset('assets/marker.png', 150);
                           final Marker marker = Marker(icon: BitmapDescriptor.fromBytes(markerIcon), markerId: const MarkerId('puppy'), position: LatLng(_currentPosition.latitude, _currentPosition.longitude));
                           _markers.add(marker);
-                        });
-
-                        /// 최초 산책 시작시 산책경로 초기화
-                        setState(() {
-                          raw = [];
                         });
 
                         /// 산책 기록 시작

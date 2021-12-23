@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:walk_with_dog/models/my_pet_model.dart';
 
@@ -81,7 +82,7 @@ class _MyScreenState extends State<MyScreen> {
           textAlign: TextAlign.center,
         ),
         decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(50), color: Colors.grey),
+            borderRadius: BorderRadius.circular(200), color: Colors.grey),
       ),
     );
   }
@@ -107,17 +108,21 @@ class _MyScreenState extends State<MyScreen> {
     // List<XFile>? pickedFileList = await ImagePicker().pickMultiImage();
     XFile? pickedFile = await ImagePicker()
         .pickImage(source: ImageSource.gallery, imageQuality: 50);
-    // final tempDir = await getTemporaryDirectory();
-    // final path = tempDir.path;
-    // int rand = new Math.Random().nextInt(10000);
+
+    String imageId = DateTime.now().millisecondsSinceEpoch.toString();
+    final directory = await getApplicationDocumentsDirectory();
+    File _image =
+    await File('${directory.path}/image_$imageId.png').create();
+    /// 임시폴더가 아닌 AppDocument폴더에 저장
+    pickedFile!.saveTo(_image.path);
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     setState(() {
-      _imagePath = pickedFile!.path;
-      prefs.setString('imagePath', _imagePath);
+      prefs.setString('imagePath', _image.path);
 
       /// image picker XFile to make file
-      _imageFile = File(pickedFile.path);
+      _imageFile = File(_image.path);
     });
   }
 
