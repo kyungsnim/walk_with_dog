@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_elevation/map_elevation.dart';
@@ -11,6 +12,9 @@ import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:walk_with_dog/constants/data4.dart';
 import 'package:screenshot/screenshot.dart';
+
+import 'history_screen.dart';
+import 'home_screen.dart';
 
 class WalkResultScreen extends StatefulWidget {
   int? totalHours;
@@ -28,6 +32,10 @@ class WalkResultScreen extends StatefulWidget {
 class _WalkResultScreenState extends State<WalkResultScreen> {
   ElevationPoint? hoverPoint;
   Uint8List? _imageFile;
+  String? saveDataTotalHours;
+  String? saveDataTotalMinutes;
+  String? saveDataTotalSeconds;
+  String? saveDataTotalDistance;
 
   //Create an instance of ScreenshotController
   ScreenshotController _screenshotController = ScreenshotController();
@@ -235,6 +243,40 @@ class _WalkResultScreenState extends State<WalkResultScreen> {
           //     ),
           //   ),
           // ),
+          /// 뒤로가기
+          Positioned(
+            top: Get.height * 0.1,
+            right: Get.width * 0.08,
+            child: InkWell(
+              onTap: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+
+                print(prefs.getInt('count'));
+
+                for (int i = 0; i < 2; i++) {
+                  print(prefs.getStringList('saveData2')![0]);
+                  print(prefs.getStringList('saveData2')![1]);
+                  print(prefs.getStringList('saveData2')![2]);
+                }
+              },
+              child: Container(
+                width: Get.width * 0.2,
+                height: Get.width * 0.2,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(50),
+                  color: Colors.grey,
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(
+                    Icons.arrow_back_ios,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ]),
       ),
     );
@@ -267,20 +309,45 @@ class _WalkResultScreenState extends State<WalkResultScreen> {
         .capture(delay: const Duration(milliseconds: 1000))
         .then((Uint8List? image) async {
       if (image != null) {
+        String imageId = DateTime.now().millisecondsSinceEpoch.toString();
         final directory = await getApplicationDocumentsDirectory();
         // final directory = Directory('/storage/emulated/0/DCIM');
-        final imagePath = await File('${directory.path}/image.png').create();
+        File imagePath =
+            await File('${directory.path}/image_$imageId.png').create();
+
+        String saveImagePath = '';
         await imagePath.writeAsBytes(image).then((_) {
           int num = 0;
-          if(prefs.getInt('count') == null) {
-            prefs.setInt('count', 1);
-            num = 1;
+
+          // /// 갤러리에 이미지 저장
+          // GallerySaver.saveImage(imagePath.path).then((value) {
+          //   print('>>>> save value= $value');
+          //   saveImagePath =
+          //       '/storage/emulated/0/DCIM/Recent/image_$imageId.png';
+          // }).catchError((err) {
+          //   print('error :( $err');
+          // });
+
+          if (prefs.getInt('count') == null) {
+            prefs.setInt('count', 0);
+            num = 0;
           } else {
             num = prefs.getInt('count')!;
           }
+
           /// 로컬DB에 저장하기
-          prefs.setStringList('saveData$num', ['${widget.totalHours}:${widget.totalMinutes}:${widget.totalSeconds}', '${widget.totalDistance}', '$imagePath']);
+          prefs.setStringList('saveData$num', [
+            '${widget.totalHours}:${widget.totalMinutes! < 10 ? '0' + widget.totalMinutes.toString() : widget.totalMinutes}:${widget.totalSeconds! < 10 ? '0' + widget.totalSeconds.toString() : widget.totalSeconds}',
+            widget.totalDistance!.toStringAsFixed(2),
+            imagePath.path,
+            // saveImagePath,
+            DateTime.now().toString().substring(0, 16)
+          ]);
+
           prefs.setInt('count', ++num);
+
+          Get.back();
+          Get.snackbar('산책기록 저장', '저장이 완료되었습니다.');
         });
 
         /// Share Plugin

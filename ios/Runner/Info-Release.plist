@@ -46,10 +46,10 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>The app nees location permission to use walking area.</string>
 	<key>NSCameraUsageDescription</key>
-    <string>To take picture and use profile photo</string>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>To record voic and use profile photoe</string>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>To use photo and use profile photo</string>
+	<string>To take picture and use profile photo</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>To record voic and use profile photoe</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>To use photo and use profile photo</string>
 </dict>
 </plist>

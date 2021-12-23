@@ -566,6 +566,11 @@ class _WalkScreenState extends State<WalkScreen>
                           _markers.add(marker);
                         });
 
+                        /// 최초 산책 시작시 산책경로 초기화
+                        setState(() {
+                          raw = [];
+                        });
+
                         /// 산책 기록 시작
                         permissionCheckAndSubscription().then((_) {
                           ///
