@@ -25,6 +25,7 @@ class _MyScreenState extends State<MyScreen> {
     MyPetModel('우동', '20200607', '4.2', '포메라니안', '남', ''),
     MyPetModel('하양', '20201212', '6.2', '포메라니안', '여', '')
   ];
+
   @override
   initState() {
     super.initState();
@@ -52,7 +53,7 @@ class _MyScreenState extends State<MyScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _imagePath.isEmpty ? needRegisterProfilePhoto() : myProfilePhoto()
+            _imageFile == null ? needRegisterProfilePhoto() : myProfilePhoto()
           ],
         ),
         const SizedBox(
@@ -64,6 +65,13 @@ class _MyScreenState extends State<MyScreen> {
             Divider(),
             myPetAreaList(),
           ],
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            prefs.clear();
+          },
+          child: Text('DB초기화'),
         ),
       ],
     ));
@@ -111,8 +119,8 @@ class _MyScreenState extends State<MyScreen> {
 
     String imageId = DateTime.now().millisecondsSinceEpoch.toString();
     final directory = await getApplicationDocumentsDirectory();
-    File _image =
-    await File('${directory.path}/image_$imageId.png').create();
+    File _image = await File('${directory.path}/image_$imageId.png').create();
+
     /// 임시폴더가 아닌 AppDocument폴더에 저장
     pickedFile!.saveTo(_image.path);
 
@@ -143,15 +151,16 @@ class _MyScreenState extends State<MyScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text('반려견',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: Get.width * 0.06,)),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: Get.width * 0.06,
+                  )),
             ),
             Spacer(),
             Text(
               '추가',
               style: TextStyle(
-                fontSize: Get.width * 0.05,
-                color: Colors.blueAccent
-              ),
+                  fontSize: Get.width * 0.05, color: Colors.blueAccent),
             ),
           ],
         ),
@@ -164,14 +173,35 @@ class _MyScreenState extends State<MyScreen> {
       shrinkWrap: true,
       itemCount: _myPetList.length,
       itemBuilder: (context, index) {
-        return  Padding(
+        return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Flexible(flex: 5,child: Text(_myPetList[index].name!, style: TextStyle(fontSize: Get.width * 0.06),)),
-              Flexible(flex: 3,child: InkWell(onTap: () => Get.to(() => EditMyPetInfoScreen(index)), child: Text('정보 변경하기', style: TextStyle(fontSize: Get.width * 0.05, color: Colors.grey),))),
-              Flexible(flex: 1,child: InkWell(onTap: () => setState(() => _myPetList.removeAt(index)),child: Text('삭제', style: TextStyle(fontSize: Get.width * 0.05, color: Colors.grey),))),
+              Flexible(
+                  flex: 5,
+                  child: Text(
+                    _myPetList[index].name!,
+                    style: TextStyle(fontSize: Get.width * 0.06),
+                  )),
+              Flexible(
+                  flex: 3,
+                  child: InkWell(
+                      onTap: () => Get.to(() => EditMyPetInfoScreen(index)),
+                      child: Text(
+                        '정보 변경하기',
+                        style: TextStyle(
+                            fontSize: Get.width * 0.05, color: Colors.grey),
+                      ))),
+              Flexible(
+                  flex: 1,
+                  child: InkWell(
+                      onTap: () => setState(() => _myPetList.removeAt(index)),
+                      child: Text(
+                        '삭제',
+                        style: TextStyle(
+                            fontSize: Get.width * 0.05, color: Colors.grey),
+                      ))),
             ],
           ),
         );
