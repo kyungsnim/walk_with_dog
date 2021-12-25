@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:walk_with_dog/screens/my_screen.dart';
+import 'package:walk_with_dog/screens/place2_screen.dart';
 import 'package:walk_with_dog/screens/place_screen.dart';
 import 'package:walk_with_dog/screens/walk_screen.dart';
 
 import 'history_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  final int getPageIndex;
-  const HomeScreen({required this.getPageIndex, Key? key}) : super(key: key);
+  // final int getPageIndex;
+  const HomeScreen({Key? key}) : super(key: key); // required this.getPageIndex,
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -29,10 +30,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
 
-    currentIndex = widget.getPageIndex;
-    setState(() {
-      getPageIndex = widget.getPageIndex;
-    });
+    // currentIndex = widget.getPageIndex;
+    // setState(() {
+    //   getPageIndex = widget.getPageIndex;
+    // });
     pageController = PageController(
       // 다른 페이지에서 넘어올 때도 controller를 통해 어떤 페이지 보여줄 것인지 셋팅
         initialPage: 0);
@@ -64,13 +65,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       onWillPop: () => showExitDialog(),
       child: DefaultTabController(
         length: 4,
-        initialIndex: currentIndex!,
+        initialIndex: 0, //currentIndex!,
         child: Scaffold(
           body: PageView(
-            children: const [
+            children: [
               WalkScreen(), //Walk2Screen(),
               HistoryScreen(),
-              PlaceScreen(),
+              Place2Screen(),
               MyScreen(),
             ],
             controller: pageController, // controller를 지정해주면 각 페이지별 인덱스로 컨트롤 가능

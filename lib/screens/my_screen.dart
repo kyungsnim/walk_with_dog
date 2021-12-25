@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:walk_with_dog/models/my_pet_model.dart';
+import 'package:walk_with_dog/screens/register_pet_info_screen.dart';
 
 import 'edit_my_pet_info_screen.dart';
 
@@ -157,10 +158,16 @@ class _MyScreenState extends State<MyScreen> {
                   )),
             ),
             Spacer(),
-            Text(
-              '추가',
-              style: TextStyle(
-                  fontSize: Get.width * 0.05, color: Colors.blueAccent),
+            InkWell(
+              onTap: () => Get.to(() => RegisterPetInfoScreen()),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  '추가',
+                  style: TextStyle(
+                      fontSize: Get.width * 0.05, color: Colors.blueAccent),
+                ),
+              ),
             ),
           ],
         ),
