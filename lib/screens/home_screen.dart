@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:walk_with_dog/screens/my_screen.dart';
 import 'package:walk_with_dog/screens/place2_screen.dart';
+import 'package:walk_with_dog/screens/place3_screen.dart';
+import 'package:walk_with_dog/screens/place4_screen.dart';
 import 'package:walk_with_dog/screens/place_screen.dart';
 import 'package:walk_with_dog/screens/walk_screen.dart';
 
@@ -71,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             children: [
               WalkScreen(), //Walk2Screen(),
               HistoryScreen(),
-              Place2Screen(),
+              Place3Screen(),
               MyScreen(),
             ],
             controller: pageController, // controller를 지정해주면 각 페이지별 인덱스로 컨트롤 가능

@@ -39,6 +39,12 @@ dependencies:
   http: ^0.13.4
   provider: ^6.0.1
 
+  flutter_dotenv: ^5.0.2
+  google_place: ^0.4.3
+
+  webview_flutter: ^2.1.1
+  url_launcher: ^6.0.17
+
   # 앱 아이콘 제작용
   flutter_launcher_icons: ^0.9.2
 
@@ -64,3 +70,11 @@ flutter:
     - assets/icon/bottom3.png
     - assets/icon/bottom4.png
     - assets/icon/foot.png
+    - assets/icon/
+    - assets/icon/icon_1.png
+    - assets/icon/icon_2.png
+    - assets/icon/icon_3.png
+    - assets/icon/icon_4.png
+    - assets/icon/icon_5.png
+    - assets/icon/icon_6.png
+#    - .env

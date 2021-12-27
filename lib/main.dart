@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:walk_with_dog/blocs/application_bloc.dart';
 import 'package:walk_with_dog/screens/home_screen.dart';
 
-void main() {
+void main() async {
+  // await DotEnv().load(fileName: '.env');
   runApp(const MyApp());
 }
 

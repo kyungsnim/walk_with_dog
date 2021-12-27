@@ -57,5 +57,10 @@
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Allow flutter tools on my computer to connect and debug my application</string>
+	<key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>https</string>
+      <string>http</string>
+    </array>
 </dict>
 </plist>

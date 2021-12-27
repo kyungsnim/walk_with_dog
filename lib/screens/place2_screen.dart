@@ -24,7 +24,6 @@ class _Place2ScreenState extends State<Place2Screen> {
     final applicationBloc =
     Provider.of<ApplicationBloc>(context, listen: false);
 
-
     //Listen for selected Location
     locationSubscription = applicationBloc.selectedLocation.stream.listen((place) {
       if (place != null) {
@@ -88,6 +87,7 @@ class _Place2ScreenState extends State<Place2Screen> {
                   child: GoogleMap(
                     mapType: MapType.normal,
                     myLocationEnabled: true,
+                    myLocationButtonEnabled: true,
                     initialCameraPosition: CameraPosition(
                       target: LatLng(
                           applicationBloc.currentLocation!.latitude,
@@ -187,7 +187,7 @@ class _Place2ScreenState extends State<Place2Screen> {
         CameraPosition(
             target: LatLng(
                 place.geometry.location.lat, place.geometry.location.lng),
-            zoom: 10.0),
+            zoom: 12.0),
       ),
     );
   }
