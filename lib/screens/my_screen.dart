@@ -26,11 +26,32 @@ class _MyScreenState extends State<MyScreen> {
     MyPetModel('우동', '20200607', '4.2', '포메라니안', '남', ''),
     MyPetModel('하양', '20201212', '6.2', '포메라니안', '여', '')
   ];
+  int savedPetDataLength = 0;
+  List<List<String>> savedPetData = [];
 
   @override
   initState() {
     super.initState();
     getImagePath();
+
+    SharedPreferences.getInstance().then((prefs) {
+      if (prefs.getInt('petCount') != null) {
+        savedPetDataLength = prefs.getInt('petCount')!;
+
+        int i = 0;
+
+        /// 저장된 반려견 정보 불러오기 : 중간중간 삭제한 정보가 있을 수 있으므로 하나 가져올 때마다 count
+        while (i < savedPetDataLength) {
+          print('savedPetData$i');
+          List<String> tmp = prefs.getStringList('savedPetData$i')!;
+          tmp.add(prefs.getInt('petIndex')!.toString());
+
+          setState(() {
+            savedPetData.add(tmp);
+          });
+        }
+      }
+    });
   }
 
   getImagePath() async {
@@ -46,7 +67,7 @@ class _MyScreenState extends State<MyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Column(
+        body: ListView(
       children: [
         SizedBox(
           height: Get.height * 0.1,
@@ -159,7 +180,39 @@ class _MyScreenState extends State<MyScreen> {
             ),
             Spacer(),
             InkWell(
-              onTap: () => Get.to(() => RegisterPetInfoScreen()),
+              onTap: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+
+                print(prefs.getInt('petCount'));
+                print(prefs.getStringList('savePetData0')![0]);
+                print(prefs.getStringList('savePetData0')![1]);
+                print(prefs.getStringList('savePetData0')![2]);
+                print(prefs.getStringList('savePetData0')![3]);
+                print(prefs.getStringList('savePetData0')![4]);
+                print(prefs.getStringList('savePetData0')![5]);
+                print(prefs.getStringList('savePetData0')![6]);
+
+                print(prefs.getStringList('savePetData1')![0]);
+                print(prefs.getStringList('savePetData1')![1]);
+                print(prefs.getStringList('savePetData1')![2]);
+                print(prefs.getStringList('savePetData1')![3]);
+                print(prefs.getStringList('savePetData1')![4]);
+                print(prefs.getStringList('savePetData1')![5]);
+                print(prefs.getStringList('savePetData1')![6]);
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'DB확인',
+                  style: TextStyle(
+                      fontSize: Get.width * 0.05, color: Colors.blueAccent),
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () => Get.to(
+                () => EditMyPetInfoScreen(),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
@@ -178,7 +231,7 @@ class _MyScreenState extends State<MyScreen> {
   myPetAreaList() {
     return ListView.builder(
       shrinkWrap: true,
-      itemCount: _myPetList.length,
+      itemCount: savedPetData.length,
       itemBuilder: (context, index) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -188,27 +241,37 @@ class _MyScreenState extends State<MyScreen> {
               Flexible(
                   flex: 5,
                   child: Text(
-                    _myPetList[index].name!,
+                    savedPetData[index][7],
                     style: TextStyle(fontSize: Get.width * 0.06),
                   )),
               Flexible(
-                  flex: 3,
-                  child: InkWell(
-                      onTap: () => Get.to(() => EditMyPetInfoScreen(index)),
-                      child: Text(
-                        '정보 변경하기',
-                        style: TextStyle(
-                            fontSize: Get.width * 0.05, color: Colors.grey),
-                      ))),
+                flex: 3,
+                child: InkWell(
+                  onTap: () => Get.to(
+                    () => EditMyPetInfoScreen(
+                      index: int.parse(savedPetData[index][0]),
+                    ),
+                  ),
+                  child: Text(
+                    '정보 변경하기',
+                    style: TextStyle(
+                        fontSize: Get.width * 0.05, color: Colors.grey),
+                  ),
+                ),
+              ),
               Flexible(
-                  flex: 1,
-                  child: InkWell(
-                      onTap: () => setState(() => _myPetList.removeAt(index)),
-                      child: Text(
-                        '삭제',
-                        style: TextStyle(
-                            fontSize: Get.width * 0.05, color: Colors.grey),
-                      ))),
+                flex: 1,
+                child: InkWell(
+                  onTap: () => setState(
+                    () => _myPetList.removeAt(index),
+                  ),
+                  child: Text(
+                    '삭제',
+                    style: TextStyle(
+                        fontSize: Get.width * 0.05, color: Colors.grey),
+                  ),
+                ),
+              ),
             ],
           ),
         );

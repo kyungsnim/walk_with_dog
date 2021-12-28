@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:gallery_saver/gallery_saver.dart';
+// import 'package:gallery_saver/gallery_saver.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_elevation/map_elevation.dart';
@@ -244,39 +244,39 @@ class _WalkResultScreenState extends State<WalkResultScreen> {
           //   ),
           // ),
           /// 뒤로가기
-          Positioned(
-            top: Get.height * 0.1,
-            right: Get.width * 0.08,
-            child: InkWell(
-              onTap: () async {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-
-                print(prefs.getInt('count'));
-
-                for (int i = 0; i < 2; i++) {
-                  print(prefs.getStringList('saveData2')![0]);
-                  print(prefs.getStringList('saveData2')![1]);
-                  print(prefs.getStringList('saveData2')![2]);
-                }
-              },
-              child: Container(
-                width: Get.width * 0.2,
-                height: Get.width * 0.2,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                  color: Colors.grey,
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(
-                    Icons.arrow_back_ios,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          // Positioned(
+          //   top: Get.height * 0.1,
+          //   right: Get.width * 0.08,
+          //   child: InkWell(
+          //     onTap: () async {
+          //       SharedPreferences prefs = await SharedPreferences.getInstance();
+          //
+          //       print(prefs.getInt('count'));
+          //
+          //       for (int i = 0; i < 2; i++) {
+          //         print(prefs.getStringList('saveData2')![0]);
+          //         print(prefs.getStringList('saveData2')![1]);
+          //         print(prefs.getStringList('saveData2')![2]);
+          //       }
+          //     },
+          //     child: Container(
+          //       width: Get.width * 0.2,
+          //       height: Get.width * 0.2,
+          //       alignment: Alignment.center,
+          //       decoration: BoxDecoration(
+          //         borderRadius: BorderRadius.circular(50),
+          //         color: Colors.grey,
+          //       ),
+          //       child: const Padding(
+          //         padding: EdgeInsets.all(8.0),
+          //         child: Icon(
+          //           Icons.arrow_back_ios,
+          //           color: Colors.white,
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ]),
       ),
     );

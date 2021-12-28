@@ -16,9 +16,9 @@ dependencies:
   flutter_polyline_points: ^1.0.0   # 구글 지도 경로표시용
   loading_indicator: ^3.0.1         # 로딩 아이콘
   shared_preferences: ^2.0.9        # 로컬 데이터 저장용
-  flutter_vibrate: ^1.3.0           # 휴대폰 진동
+#  flutter_vibrate: ^1.3.0           # 휴대폰 진동
   image_picker: ^0.8.4+3            # 갤러리 이미지 가져오기 (프로필 사진 등록용)
-  gallery_saver: ^2.3.2             # 갤러리에 이미지 저장하기
+#  gallery_saver: ^2.3.2             # 갤러리에 이미지 저장하기
   get: ^4.3.8                       # 화면 전환, 화면크기 설정용
   path_provider: ^2.0.8             # 이미지 저장 경로 지정
   geolocator: ^8.0.1                # 현재 위치(위/경도) 가져오기

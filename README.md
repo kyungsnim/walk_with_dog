@@ -22,6 +22,9 @@
 ### 2021.12.27(월)
 - 플레이스 페이지 (google_place) 구현 중
 
+### 2021.12.28(화)
+- 아이폰에서 갑자기 빌드가 안되는 오류 발생... 오류 잡는 중
+
 ## 화면구성
 - 산책 페이지 : 지도에 현재위치 표시/산책시간 및 이동거리 기록/기록 종료시 이동한 발자취 이미지 등으로 저장
 - 기록 페이지 : 산책 종료시 기록되는 정보를 저장하는 페이지. (리스트형태) 종료 후 사진 1장 남기기
@@ -47,3 +50,9 @@
 - 해당 작업을 산책 종료버튼 누르기 전까지 반복 수행
 
 - 아 말은 쉽다..
+
+
+// import GoogleMaps
+
+    // GMSServices.provideAPIKey("AIzaSyCxpAI7_oyr4Na46DdT9Zmv_0uX1IuXt74")
+    // GMSServices.provideAPIKey("AIzaSyC9Dlk1jky-n9-FKd-e25sgsi64YxTkb-k")

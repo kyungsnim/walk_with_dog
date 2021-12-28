@@ -54,6 +54,43 @@ class _WalkScreenState extends State<WalkScreen>
   lc.LocationData? _oldLocationData;
   lc.LocationData? _newLocationData;
 
+  _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    return await Geolocator.getCurrentPosition();
+  }
+
   // 시작, 일시정지 버튼
   void _click() {
     _isPlaying = !_isPlaying;
@@ -153,25 +190,28 @@ class _WalkScreenState extends State<WalkScreen>
   void initState() {
     super.initState();
     /// background에도 동작하도록
-    location.enableBackgroundMode(enable: true);
+    _determinePosition().then(((_) {
+      location.enableBackgroundMode(enable: true);
 
-    /// 현재 위치 받아와서 초기 카메라위치 설정 및 위치 저
-    location.getLocation().then((location) async {
-      setState(() {
-        _initialLocation = CameraPosition(target: LatLng(location.latitude!, location.longitude!), zoom: 18);
+      /// 현재 위치 받아와서 초기 카메라위치 설정 및 위치 저
+      location.getLocation().then((location) async {
+        setState(() {
+          _initialLocation = CameraPosition(target: LatLng(location.latitude!, location.longitude!), zoom: 18);
+        });
+        _newLocationData = location;
+        _oldLocationData = location;
+
+        // mapController!.animateCamera(
+        //   CameraUpdate.newCameraPosition(
+        //     CameraPosition(
+        //       target: LatLng(location.latitude!, location.longitude!),
+        //       zoom: 18.0,
+        //     ),
+        //   ),
+        // );
       });
-      _newLocationData = location;
-      _oldLocationData = location;
 
-      // mapController!.animateCamera(
-      //   CameraUpdate.newCameraPosition(
-      //     CameraPosition(
-      //       target: LatLng(location.latitude!, location.longitude!),
-      //       zoom: 18.0,
-      //     ),
-      //   ),
-      // );
-    });
+    }));
 
     /// 내 현재 위치 가져오기
     // _getCurrentLocation();
@@ -263,7 +303,7 @@ class _WalkScreenState extends State<WalkScreen>
       width: width,
       child: Scaffold(
         key: _scaffoldKey,
-        body: Column(
+        body: ListView(
           children: [
             _initialLocation == null ?
             SizedBox(
